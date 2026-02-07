@@ -1,6 +1,6 @@
 # Airflow docker compose
 Getting Airflow docker-compose.yaml from https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html
-# Create .env file
+Create .env file
 # Run docker compose
 docker compose up -d
 # Access to airflow
