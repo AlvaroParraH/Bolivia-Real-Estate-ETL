@@ -1,0 +1,18 @@
+[0m08:53:16.670095 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x11cba7250>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x11cba6fd0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x11cc23910>]}
+
+
+============================== 08:53:16.779942 | 19d35939-2e4c-4258-b75c-1aca12f67d5b ==============================
+[0m08:53:16.779942 [info ] [MainThread]: Running with dbt=1.11.3
+[0m08:53:16.781010 [debug] [MainThread]: running dbt with arguments {'quiet': 'False', 'use_colors': 'True', 'warn_error': 'None', 'use_experimental_parser': 'False', 'target_path': 'None', 'version_check': 'True', 'send_anonymous_usage_stats': 'True', 'profiles_dir': '/Users/alvaroparra/.dbt', 'introspect': 'True', 'empty': 'None', 'log_cache_events': 'False', 'indirect_selection': 'eager', 'partial_parse': 'True', 'debug': 'False', 'cache_selected_only': 'False', 'log_format': 'default', 'invocation_command': 'dbt debug', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'log_path': 'logs', 'write_json': 'True', 'fail_fast': 'False', 'printer_width': '80', 'no_print': 'None', 'static_parser': 'True'}
+[0m08:53:17.035176 [info ] [MainThread]: dbt version: 1.11.3
+[0m08:53:17.036481 [info ] [MainThread]: python version: 3.11.13
+[0m08:53:17.037386 [info ] [MainThread]: python path: /Users/alvaroparra/Documents/Personal/projects/project_1/.venv/bin/python3
+[0m08:53:17.038162 [info ] [MainThread]: os info: macOS-15.7.3-arm64-arm-64bit
+[0m08:53:17.056272 [error] [MainThread]: Encountered an error:
+Parsing Error
+  Env var required but not provided: 'SNOWFLAKE_ACCOUNT'
+[0m08:53:17.057503 [debug] [MainThread]: Resource report: {"command_name": "debug", "command_success": false, "command_wall_clock_time": 0.81210965, "process_in_blocks": "0", "process_kernel_time": 1.464238, "process_mem_max_rss": "139116544", "process_out_blocks": "0", "process_user_time": 2.874961}
+[0m08:53:17.057982 [debug] [MainThread]: Command `dbt debug` failed at 08:53:17.057903 after 0.81 seconds
+[0m08:53:17.058308 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x11cc22910>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x11cba6450>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x11cba73d0>]}
+[0m08:53:17.058610 [debug] [MainThread]: Flushing usage events
+[0m08:53:18.066225 [debug] [MainThread]: An error was encountered while trying to flush usage events
