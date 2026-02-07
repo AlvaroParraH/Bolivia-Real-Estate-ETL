@@ -15,13 +15,9 @@ uv init
 uv add dbt-core dbt-snowflake
 # To uninstall
 uv remove dbt-core dbt-snowflake
-
 # uv commands
 uv tree
 uv sync
 uv pip list
-
 # To check installed 
-
-
-
+uv run dbt --version
