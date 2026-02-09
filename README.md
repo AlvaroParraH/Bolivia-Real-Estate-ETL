@@ -21,3 +21,9 @@ uv sync
 uv pip list
 # To check installed 
 uv run dbt --version
+# Start DBT
+uv run dbt init
+# Change DBT files
+/Users/alvaroparra/.dbt/profiles.yml
+dbt_project.yml
+# Add packages file and add dbt utils
