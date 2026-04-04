@@ -27,3 +27,20 @@ uv run dbt init
 /Users/alvaroparra/.dbt/profiles.yml
 dbt_project.yml
 # Add packages file and add dbt utils
+
+# Rental analysis in Bolivia
+This project is focus in extracting information from multiple sites, https://remax.bo/, https://c21.com.bo/, https://firmacasas.com/ that are websites dedicated to house/apartment rentals, To this analysis we are going to include facebook market as it is also a popular platform.
+
+# Motivation
+It is mostly based on my experience, I decided to rent a home in my hometown in Bolivia, I hired a company for it and they gave me price ranges bellow what I was expecting, they did they analysis for getting a rental price based on location and not the amenities of the apartment, they browse arround the websites, It took a week for the realtor to get the data and process it, I think that it was too slow and that the process took more than expected and it was unefficient and unnecesary.
+
+# Next Steps
+Expand into selling apartments, rental/selling homes and do it for main cities around Bolivia (La Paz/Cochabamba/Santa Cruz)
+
+# Data Scrapping from websites
+Data Scrapping would be done by using Spider and 
+For facebook, We would need to use other tools
+
+# Posting information on Reddit on Rentals
+This information is going to be posted on reddit and comments are going to be monitored for improving it.
+
