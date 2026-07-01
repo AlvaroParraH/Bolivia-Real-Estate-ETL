@@ -23,7 +23,46 @@ DEFAULT_URL_SANTA_CRUZ = (
     "tipo_casa-o-casa-en-condominio/operacion_venta/en-pais_bolivia/en-estado_santa-cruz"
 )
 
-DEFAULT_URLS = (DEFAULT_URL, DEFAULT_URL_SANTA_CRUZ)
+DEFAULT_URL_COCHABAMBA = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_casa-o-casa-en-condominio/operacion_venta/en-pais_bolivia/en-estado_cochabamba"
+)
+
+DEFAULT_URL_BENI = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_casa-o-casa-en-condominio/operacion_venta/en-pais_bolivia/en-estado_beni"
+)
+
+DEFAULT_URL_CHUQUISACA = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_casa-o-casa-en-condominio/operacion_venta/en-pais_bolivia/en-estado_chuquisaca"
+)
+
+DEFAULT_URL_ORURO = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_casa-o-casa-en-condominio/operacion_venta/en-pais_bolivia/en-estado_oruro"
+)
+
+DEFAULT_URL_POTOSI = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_casa-o-casa-en-condominio/operacion_venta/en-pais_bolivia/en-estado_potosi"
+)
+
+DEFAULT_URL_TARIJA = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_casa-o-casa-en-condominio/operacion_venta/en-pais_bolivia/en-estado_tarija"
+)
+
+DEFAULT_URLS = (
+    DEFAULT_URL,
+    DEFAULT_URL_SANTA_CRUZ,
+    DEFAULT_URL_COCHABAMBA,
+    DEFAULT_URL_BENI,
+    DEFAULT_URL_CHUQUISACA,
+    DEFAULT_URL_ORURO,
+    DEFAULT_URL_POTOSI,
+    DEFAULT_URL_TARIJA,
+)
 
 DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -34,10 +73,12 @@ DEFAULT_MIN_DELAY_MS = 1200
 DEFAULT_MAX_DELAY_MS = 2600
 
 NUMBER_RE = re.compile(r"[\d.,]+")
+CITY_RE = re.compile(r"en-estado_([^/]+)")
 
 
 @dataclass(slots=True)
 class Listing:
+    city: str
     property_id: str
     property_type: str
     title: str
@@ -82,6 +123,13 @@ def _build_page_url(base_url: str, page_number: int) -> str:
     if page_number <= 1:
         return base_url.rstrip("/")
     return f"{base_url.rstrip('/')}/pagina_{page_number}"
+
+
+def _infer_city_label(base_url: str) -> str:
+    match = CITY_RE.search(base_url)
+    if not match:
+        return "unknown"
+    return match.group(1).replace("_", "-").lower()
 
 
 def _random_delay(page: object) -> None:
@@ -134,7 +182,11 @@ def _extract_records(page: object, limit: int | None = None) -> list[dict[str, s
     )
 
 
-def _records_to_listings(records: list[dict[str, str | int | None]], seen_ids: set[str]) -> list[Listing]:
+def _records_to_listings(
+    records: list[dict[str, str | int | None]],
+    seen_ids: set[str],
+    city: str,
+) -> list[Listing]:
     listings: list[Listing] = []
 
     for record in records:
@@ -145,6 +197,7 @@ def _records_to_listings(records: list[dict[str, str | int | None]], seen_ids: s
 
         listings.append(
             Listing(
+                city=city,
                 property_id=property_id,
                 property_type=_clean_text(record.get("property_type")),
                 title=_clean_text(record.get("title")),
@@ -193,6 +246,8 @@ def scrape_listings(
         page.set_default_timeout(30000)
 
         for base_url in base_urls:
+            city = _infer_city_label(base_url)
+
             for page_number in range(1, max_pages + 1):
                 page_url = _build_page_url(base_url, page_number)
                 page.goto(page_url, wait_until="domcontentloaded")
@@ -210,7 +265,7 @@ def scrape_listings(
                     break
 
                 records = _extract_records(page, remaining)
-                page_listings = _records_to_listings(records, seen_ids)
+                page_listings = _records_to_listings(records, seen_ids, city)
                 if not page_listings:
                     break
 
