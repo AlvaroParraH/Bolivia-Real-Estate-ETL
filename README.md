@@ -41,6 +41,20 @@ Expand into selling apartments, rental/selling homes and do it for main cities a
 Data Scrapping would be done by using Spider and 
 For facebook, We would need to use other tools
 
+# Century 21 scraper
+This project now includes a Playwright-based scraper for Century 21 Bolivia result pages.
+
+Run it with:
+
+```bash
+.venv/bin/python main.py --limit 10 --format csv
+.venv/bin/python main.py --limit 10 --output data/listings.json
+.venv/bin/python main.py --limit 10 --output data/listings.csv --format csv
+```
+
+By default, CSV files are written to `data/c21_listings.csv` inside the project.
+The default scrape targets the La Paz and Santa Cruz houses and houses-in-condominium sale results pages.
+
 # Posting information on Reddit on Rentals
 This information is going to be posted on reddit and comments are going to be monitored for improving it.
 
