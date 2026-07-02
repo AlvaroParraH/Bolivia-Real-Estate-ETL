@@ -71,6 +71,8 @@ DEFAULT_USER_AGENT = (
 )
 DEFAULT_MIN_DELAY_MS = 1200
 DEFAULT_MAX_DELAY_MS = 2600
+DEFAULT_NAVIGATION_RETRIES = 3
+DEFAULT_NAVIGATION_RETRY_WAIT_MS = 1500
 
 NUMBER_RE = re.compile(r"[\d.,]+")
 CITY_RE = re.compile(r"en-estado_([^/]+)")
@@ -135,6 +137,23 @@ def _infer_city_label(base_url: str) -> str:
 def _random_delay(page: object) -> None:
     delay_ms = random.randint(DEFAULT_MIN_DELAY_MS, DEFAULT_MAX_DELAY_MS)
     page.wait_for_timeout(delay_ms)
+
+
+def _safe_goto(page: object, page_url: str) -> bool:
+    for attempt in range(1, DEFAULT_NAVIGATION_RETRIES + 1):
+        try:
+            page.goto(page_url, wait_until="domcontentloaded")
+            try:
+                page.wait_for_load_state("networkidle", timeout=5000)
+            except Exception:
+                pass
+            return True
+        except Exception:
+            if attempt == DEFAULT_NAVIGATION_RETRIES:
+                return False
+            page.wait_for_timeout(DEFAULT_NAVIGATION_RETRY_WAIT_MS * attempt)
+
+    return False
 
 
 def _extract_records(page: object, limit: int | None = None) -> list[dict[str, str | int | None]]:
@@ -250,11 +269,8 @@ def scrape_listings(
 
             for page_number in range(1, max_pages + 1):
                 page_url = _build_page_url(base_url, page_number)
-                page.goto(page_url, wait_until="domcontentloaded")
-                try:
-                    page.wait_for_load_state("networkidle", timeout=5000)
-                except Exception:
-                    pass
+                if not _safe_goto(page, page_url):
+                    break
                 _random_delay(page)
 
                 if not page.locator('a.btnVerDetalle[href*="/propiedad/"]').count():
