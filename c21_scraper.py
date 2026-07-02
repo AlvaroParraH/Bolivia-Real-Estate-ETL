@@ -8,6 +8,7 @@ import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from collections.abc import Sequence
+from urllib.parse import parse_qs, urlparse
 
 import pandas as pd
 from playwright.sync_api import sync_playwright
@@ -94,6 +95,9 @@ class Listing:
     price_amount: int | None
     url: str
     thumbnail_url: str | None
+    map_google_url: str | None
+    map_latitude: float | None
+    map_longitude: float | None
 
 
 def _clean_text(value: str | None) -> str:
@@ -119,6 +123,44 @@ def _parse_price(value: str | None) -> int | None:
         return None
     numeric = match.group(0).replace(".", "").replace(",", "")
     return int(numeric) if numeric else None
+
+
+def _parse_float(value: str | None) -> float | None:
+    if not value:
+        return None
+    try:
+        return float(value.strip())
+    except ValueError:
+        return None
+
+
+def _parse_google_maps_coordinates(google_maps_url: str | None) -> tuple[float | None, float | None]:
+    if not google_maps_url:
+        return None, None
+
+    normalized = html.unescape(google_maps_url).strip()
+    parsed = urlparse(normalized)
+    query = parse_qs(parsed.query)
+
+    daddr = query.get("daddr", [""])[0]
+    if daddr and "," in daddr:
+        lat_text, lng_text = (part.strip() for part in daddr.split(",", maxsplit=1))
+        lat, lng = _parse_float(lat_text), _parse_float(lng_text)
+        if lat is not None and lng is not None:
+            return lat, lng
+
+    ll = query.get("ll", [""])[0]
+    if ll and "," in ll:
+        lat_text, lng_text = (part.strip() for part in ll.split(",", maxsplit=1))
+        lat, lng = _parse_float(lat_text), _parse_float(lng_text)
+        if lat is not None and lng is not None:
+            return lat, lng
+
+    path_match = re.search(r"@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)", normalized)
+    if path_match:
+        return _parse_float(path_match.group(1)), _parse_float(path_match.group(2))
+
+    return None, None
 
 
 def _build_page_url(base_url: str, page_number: int) -> str:
@@ -201,6 +243,78 @@ def _extract_records(page: object, limit: int | None = None) -> list[dict[str, s
     )
 
 
+def _extract_map_details(page: object, property_url: str) -> dict[str, str | float | None]:
+    details: dict[str, str | float | None] = {
+        "map_google_url": None,
+        "map_latitude": None,
+        "map_longitude": None,
+    }
+
+    if not property_url or not _safe_goto(page, property_url):
+        return details
+
+    page.wait_for_timeout(800)
+
+    page.evaluate(
+        r"""
+        () => {
+          const originalOpen = window.open;
+          window.__c21OpenedUrls = [];
+          window.open = function (...args) {
+            try {
+              window.__c21OpenedUrls.push(args[0] || '');
+            } catch (_) {}
+            return originalOpen.apply(this, args);
+          };
+        }
+        """
+    )
+
+    open_map_button = page.get_by_role("button", name=re.compile(r"open\s*map", re.IGNORECASE)).first
+
+    if open_map_button.count() == 0:
+        # Some listings require opening the map section before the Open Map button appears.
+        map_tab_button = page.get_by_role("button", name=re.compile(r"^mapa$", re.IGNORECASE)).first
+        if map_tab_button.count() > 0:
+            try:
+                map_tab_button.click(timeout=5000)
+                page.wait_for_timeout(600)
+            except Exception:
+                pass
+
+        open_map_button = page.get_by_role("button", name=re.compile(r"open\s*map", re.IGNORECASE)).first
+
+    if open_map_button.count() == 0:
+        return details
+
+    try:
+        open_map_button.click(timeout=5000)
+        page.wait_for_timeout(1000)
+    except Exception:
+        return details
+
+    candidate_url = page.evaluate(
+        r"""
+        () => {
+          const opened = Array.isArray(window.__c21OpenedUrls) ? window.__c21OpenedUrls : [];
+          const openedUrl = opened.find((url) => /google\.|maps\./i.test(url || ''));
+          if (openedUrl) return openedUrl;
+
+          const links = Array.from(document.querySelectorAll('a[href]')).map((a) => a.href || '');
+          return links.find((url) => /google\.|maps\./i.test(url || '')) || null;
+        }
+        """
+    )
+
+    clean_url = _clean_text(candidate_url) or None
+    lat, lng = _parse_google_maps_coordinates(clean_url)
+
+    details["map_google_url"] = clean_url
+    details["map_latitude"] = lat
+    details["map_longitude"] = lng
+    return details
+
+
 def _records_to_listings(
     records: list[dict[str, str | int | None]],
     seen_ids: set[str],
@@ -230,6 +344,9 @@ def _records_to_listings(
                 price_amount=_parse_price(record.get("price_text")),
                 url=_clean_text(record.get("url")),
                 thumbnail_url=_clean_text(record.get("thumbnail_url")) or None,
+                map_google_url=None,
+                map_latitude=None,
+                map_longitude=None,
             )
         )
 
@@ -262,7 +379,9 @@ def scrape_listings(
         )
 
         page = context.new_page()
+        detail_page = context.new_page()
         page.set_default_timeout(30000)
+        detail_page.set_default_timeout(30000)
 
         for base_url in base_urls:
             city = _infer_city_label(base_url)
@@ -284,6 +403,12 @@ def scrape_listings(
                 page_listings = _records_to_listings(records, seen_ids, city)
                 if not page_listings:
                     break
+
+                for listing in page_listings:
+                    map_details = _extract_map_details(detail_page, listing.url)
+                    listing.map_google_url = map_details["map_google_url"]
+                    listing.map_latitude = map_details["map_latitude"]
+                    listing.map_longitude = map_details["map_longitude"]
 
                 listings.extend(page_listings)
                 if limit is not None and len(listings) >= limit:
