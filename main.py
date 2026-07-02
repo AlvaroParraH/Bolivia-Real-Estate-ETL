@@ -40,7 +40,8 @@ def main() -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     if args.format == "csv":
-        dataframe.to_csv(output_path, index=False)
+        # Use UTF-8 BOM so spreadsheet tools reliably detect Unicode accents.
+        dataframe.to_csv(output_path, index=False, encoding="utf-8-sig")
     else:
         export_json(listings, str(output_path))
 

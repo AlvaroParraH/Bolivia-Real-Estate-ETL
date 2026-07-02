@@ -308,7 +308,7 @@ def export_csv(listings: list[Listing], output_path: str) -> None:
     rows = [asdict(listing) for listing in listings]
     fieldnames = list(rows[0].keys()) if rows else [field.name for field in Listing.__dataclass_fields__.values()]
 
-    with Path(output_path).open("w", newline="", encoding="utf-8") as handle:
+    with Path(output_path).open("w", newline="", encoding="utf-8-sig") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
