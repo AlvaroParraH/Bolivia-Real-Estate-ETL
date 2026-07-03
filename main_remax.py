@@ -64,12 +64,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Scrape RE/MAX Bolivia listings")
     parser.add_argument("--url", default=DEFAULT_URLS, help="Search results page or pages to scrape")
     parser.add_argument("--limit", type=int, default=None, help="Optional max number of listings to collect")
-    parser.add_argument(
-        "--max-pages",
-        type=int,
-        default=10,
-        help="Maximum number of paginated result pages to scrape per URL",
-    )
     parser.add_argument("--output", help="Write results to a file instead of stdout")
     parser.add_argument(
         "--format",
@@ -104,7 +98,6 @@ def main() -> None:
         city_listings = scrape_listings(
             url=base_url,
             limit=remaining_limit,
-            max_pages=args.max_pages,
             pagination_log_file=DEFAULT_LOG_FILE,
             pagination_log_run_id=timestamp,
         )

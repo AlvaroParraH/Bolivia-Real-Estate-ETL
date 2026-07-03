@@ -33,6 +33,42 @@ DEFAULT_BLOCKED_RESOURCE_TYPES = {"image", "media", "font"}
 NUMBER_RE = re.compile(r"[\d.,]+")
 SEARCH_CITY_RE = re.compile(r"/search/(?:[^/]+/)*([^/?#]+)")
 
+CITY_SLUGS = {
+    "achocalla",
+    "arbieto",
+    "cochabamba",
+    "colcapirhua",
+    "cotoca",
+    "el-alto",
+    "la-guardia",
+    "la-paz",
+    "oruro",
+    "potosi",
+    "porongo",
+    "quillacollo",
+    "sacaba",
+    "san-benito",
+    "santa-cruz-de-la-sierra",
+    "sipe-sipe",
+    "sucre",
+    "tarija",
+    "trinidad",
+    "vinto",
+    "warnes",
+}
+
+LEADING_PROPERTY_PREFIXES = {
+    "alquiler",
+    "casa",
+    "departamento",
+    "duplex",
+    "lote",
+    "oficina",
+    "propiedad",
+    "terreno",
+    "venta",
+}
+
 
 @dataclass(slots=True)
 class Listing:
@@ -111,7 +147,7 @@ def _page_number_from_url(url: str) -> int:
         return 1
 
 
-def _discover_pagination_urls(page: object, current_url: str, max_pages: int) -> list[str]:
+def _discover_pagination_urls(page: object, current_url: str) -> list[str]:
     discovered: list[str] = page.evaluate(
         r"""
         ({ currentUrl }) => {
@@ -144,7 +180,7 @@ def _discover_pagination_urls(page: object, current_url: str, max_pages: int) ->
         page_urls.append(candidate)
 
     unique_sorted = sorted(set(page_urls), key=_page_number_from_url)
-    return unique_sorted[:max_pages]
+    return unique_sorted
 
 
 def _log_pagination_urls(
@@ -174,6 +210,42 @@ def _infer_city_label(base_url: str) -> str:
     if not match:
         return "unknown"
     return match.group(1).replace("_", "-").lower()
+
+
+def _city_from_location_text(location: str | None) -> str | None:
+    cleaned = _clean_text(location)
+    if not cleaned:
+        return None
+
+    parts = [part.strip() for part in cleaned.split(",") if part.strip()]
+    if not parts:
+        return None
+
+    return parts[-1].lower().replace(" ", "-")
+
+
+def _city_from_property_id(property_id: str | None) -> str | None:
+    slug = _clean_text(property_id).lower()
+    if not slug:
+        return None
+
+    slug = re.sub(r"(?:-\d+)+$", "", slug)
+    tokens = [token for token in slug.split("-") if token]
+    if not tokens:
+        return None
+
+    while tokens and tokens[0] in LEADING_PROPERTY_PREFIXES:
+        tokens.pop(0)
+
+    if not tokens:
+        return None
+
+    for size in range(min(5, len(tokens)), 0, -1):
+        candidate = "-".join(tokens[:size])
+        if candidate in CITY_SLUGS:
+            return candidate
+
+    return tokens[0]
 
 
 def _random_delay(page: object) -> None:
@@ -286,7 +358,7 @@ def _extract_records_from_listings_data(
 def _records_to_listings(
     records: list[dict[str, str | int | None]],
     seen_ids: set[str],
-    city: str,
+    fallback_city: str,
 ) -> list[Listing]:
     listings: list[Listing] = []
 
@@ -298,7 +370,11 @@ def _records_to_listings(
 
         listings.append(
             Listing(
-                city=city,
+                city=(
+                    _city_from_property_id(property_id)
+                    or _city_from_location_text(record.get("location"))
+                    or fallback_city
+                ),
                 property_id=property_id,
                 property_type=_clean_text(record.get("property_type")),
                 transaction_type=_clean_text(record.get("transaction_type")),
@@ -326,7 +402,6 @@ def _records_to_listings(
 def scrape_listings(
     url: str | Sequence[str] = DEFAULT_URLS,
     limit: int | None = None,
-    max_pages: int = 10,
     pagination_log_file: str | Path | None = None,
     pagination_log_run_id: str = "run",
 ) -> list[Listing]:
@@ -370,9 +445,9 @@ def scrape_listings(
                     last_page = max(1, int(raw_last_page))
                 except (TypeError, ValueError):
                     last_page = 1
-                pagination_urls = [_build_page_url(base_url, page_number) for page_number in range(1, min(last_page, max_pages) + 1)]
+                pagination_urls = [_build_page_url(base_url, page_number) for page_number in range(1, last_page + 1)]
             else:
-                pagination_urls = [_build_page_url(base_url, page_number) for page_number in range(1, max_pages + 1)]
+                pagination_urls = _discover_pagination_urls(page, base_url)
 
             _log_pagination_urls(
                 pagination_log_file,
