@@ -74,6 +74,7 @@ DEFAULT_MIN_DELAY_MS = 1200
 DEFAULT_MAX_DELAY_MS = 2600
 DEFAULT_NAVIGATION_RETRIES = 3
 DEFAULT_NAVIGATION_RETRY_WAIT_MS = 1500
+DEFAULT_BLOCKED_RESOURCE_TYPES = {"image", "media", "font"}
 
 NUMBER_RE = re.compile(r"[\d.,]+")
 CITY_RE = re.compile(r"en-estado_([^/]+)")
@@ -198,6 +199,17 @@ def _safe_goto(page: object, page_url: str) -> bool:
     return False
 
 
+def _close_extra_pages(context: object, keep_pages: Sequence[object]) -> None:
+    keep_ids = {id(page) for page in keep_pages}
+    for extra_page in list(context.pages):
+        if id(extra_page) in keep_ids:
+            continue
+        try:
+            extra_page.close()
+        except Exception:
+            pass
+
+
 def _extract_records(page: object, limit: int | None = None) -> list[dict[str, str | int | None]]:
     return page.locator('a.btnVerDetalle[href*="/propiedad/"]').evaluate_all(
         """
@@ -258,13 +270,13 @@ def _extract_map_details(page: object, property_url: str) -> dict[str, str | flo
     page.evaluate(
         r"""
         () => {
-          const originalOpen = window.open;
           window.__c21OpenedUrls = [];
           window.open = function (...args) {
             try {
               window.__c21OpenedUrls.push(args[0] || '');
             } catch (_) {}
-            return originalOpen.apply(this, args);
+                        // Avoid opening extra tabs/popups; we only need the URL.
+                        return null;
           };
         }
         """
@@ -363,6 +375,7 @@ def scrape_listings(
     url: str | Sequence[str] = DEFAULT_URLS,
     limit: int | None = None,
     max_pages: int = 10,
+    enrich_map_details: bool = True,
 ) -> list[Listing]:
     listings: list[Listing] = []
     seen_ids: set[str] = set()
@@ -378,6 +391,13 @@ def scrape_listings(
             extra_http_headers={"Accept-Language": "es-BO,es;q=0.9,en;q=0.8"},
         )
 
+        context.route(
+            "**/*",
+            lambda route, request: route.abort()
+            if request.resource_type in DEFAULT_BLOCKED_RESOURCE_TYPES
+            else route.continue_(),
+        )
+
         page = context.new_page()
         detail_page = context.new_page()
         page.set_default_timeout(30000)
@@ -385,6 +405,7 @@ def scrape_listings(
 
         for base_url in base_urls:
             city = _infer_city_label(base_url)
+            city_start_count = len(listings)
 
             for page_number in range(1, max_pages + 1):
                 page_url = _build_page_url(base_url, page_number)
@@ -404,11 +425,13 @@ def scrape_listings(
                 if not page_listings:
                     break
 
-                for listing in page_listings:
-                    map_details = _extract_map_details(detail_page, listing.url)
-                    listing.map_google_url = map_details["map_google_url"]
-                    listing.map_latitude = map_details["map_latitude"]
-                    listing.map_longitude = map_details["map_longitude"]
+                if enrich_map_details:
+                    for listing in page_listings:
+                        map_details = _extract_map_details(detail_page, listing.url)
+                        listing.map_google_url = map_details["map_google_url"]
+                        listing.map_latitude = map_details["map_latitude"]
+                        listing.map_longitude = map_details["map_longitude"]
+                        _close_extra_pages(context, (page, detail_page))
 
                 listings.extend(page_listings)
                 if limit is not None and len(listings) >= limit:
@@ -416,6 +439,9 @@ def scrape_listings(
 
             if limit is not None and len(listings) >= limit:
                 break
+
+            city_count = len(listings) - city_start_count
+            print(f"Processed city '{city}': scraped {city_count} records")
 
         browser.close()
 

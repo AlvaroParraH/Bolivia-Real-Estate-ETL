@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import argparse
 import json
+from datetime import datetime
 from pathlib import Path
+from time import perf_counter
 
 from c21_scraper import DEFAULT_URLS, export_json, listings_to_dataframe, scrape_listings
 
@@ -19,6 +21,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Scrape Century 21 Bolivia listings")
     parser.add_argument("--url", default=DEFAULT_URLS, help="Search results page or pages to scrape")
     parser.add_argument("--limit", type=int, default=None, help="Optional max number of listings to collect")
+    parser.add_argument(
+        "--skip-map-details",
+        action="store_true",
+        help="Skip per-listing map page visits (much faster and lower memory usage)",
+    )
     parser.add_argument("--output", help="Write results to a file instead of stdout")
     parser.add_argument(
         "--format",
@@ -33,7 +40,15 @@ def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
 
-    listings = scrape_listings(url=args.url, limit=args.limit)
+    started_at = datetime.now()
+    started_perf = perf_counter()
+    print(f"Script started at {started_at.strftime('%Y-%m-%d %H:%M:%S')}")
+
+    listings = scrape_listings(
+        url=args.url,
+        limit=args.limit,
+        enrich_map_details=not args.skip_map_details,
+    )
     dataframe = listings_to_dataframe(listings)
     output_path = Path(args.output) if args.output else default_output_path(args.format)
 
@@ -45,6 +60,10 @@ def main() -> None:
     else:
         export_json(listings, str(output_path))
 
+    ended_at = datetime.now()
+    elapsed_seconds = perf_counter() - started_perf
+    print(f"Script finished at {ended_at.strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"Total runtime: {elapsed_seconds:.2f} seconds")
     print(f"Wrote {len(dataframe)} listings to {output_path}")
 
 
