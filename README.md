@@ -52,7 +52,8 @@ Run it with:
 .venv/bin/python main.py --limit 10 --output data/listings.csv --format csv
 ```
 
-By default, CSV files are written to `data/c21_listings.csv` inside the project.
+Outputs are now split by city and include a timestamp in the filename, for example:
+`data/c21_house_listings_la-paz_20260703_143500.csv`.
 The default scrape targets the La Paz and Santa Cruz houses and houses-in-condominium sale results pages.
 
 # Posting information on Reddit on Rentals
