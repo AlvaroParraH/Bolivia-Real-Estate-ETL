@@ -56,6 +56,21 @@ Outputs are now split by city and include a timestamp in the filename, for examp
 `data/c21_house_listings_la-paz_20260703_143500.csv`.
 The default scrape targets the La Paz and Santa Cruz houses and houses-in-condominium sale results pages.
 
+# RE/MAX scraper
+This project now also includes a Playwright-based scraper for RE/MAX Bolivia search result pages.
+
+Run it with:
+
+```bash
+.venv/bin/python main_remax.py --limit 10 --format csv
+.venv/bin/python main_remax.py --limit 10 --output data/listings.json
+.venv/bin/python main_remax.py --limit 10 --output data/listings.csv --format csv
+.venv/bin/python main_remax.py --limit 10 --max-pages 25 --format csv
+```
+
+Outputs are also split by city and include a timestamp in the filename, for example:
+`data/remax_house_listings_la-paz_20260703_143500.csv`.
+
 # Posting information on Reddit on Rentals
 This information is going to be posted on reddit and comments are going to be monitored for improving it.
 
