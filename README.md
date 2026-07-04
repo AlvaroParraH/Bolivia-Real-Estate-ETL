@@ -65,11 +65,30 @@ Run it with:
 .venv/bin/python main_remax.py --limit 10 --format csv
 .venv/bin/python main_remax.py --limit 10 --output data/listings.json
 .venv/bin/python main_remax.py --limit 10 --output data/listings.csv --format csv
-.venv/bin/python main_remax.py --limit 10 --max-pages 25 --format csv
 ```
 
 Outputs are also split by city and include a timestamp in the filename, for example:
 `data/remax_house_listings_la-paz_20260703_143500.csv`.
+
+# Firmacasas scraper
+This project now also includes an API-based scraper for Firmacasas listings.
+
+The default Firmacasas filters are:
+- Categoria: Casa
+- Tipo: Venta
+- Ciudad: all cities
+
+Run it with:
+
+```bash
+.venv/bin/python main_firmacasas.py --limit 10 --format csv
+.venv/bin/python main_firmacasas.py --limit 10 --output data/listings.json
+.venv/bin/python main_firmacasas.py --limit 10 --output data/listings.csv --format csv
+.venv/bin/python main_firmacasas.py --city-id 1 --city-id 3 --limit 20 --format csv
+```
+
+Outputs are split by city and include a timestamp in the filename, for example:
+`data/firmacasas_house_listings_la-paz_20260704_064113.csv`.
 
 # Posting information on Reddit on Rentals
 This information is going to be posted on reddit and comments are going to be monitored for improving it.
