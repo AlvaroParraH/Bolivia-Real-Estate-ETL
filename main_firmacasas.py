@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import argparse
+import os
 import re
 from datetime import datetime
 from pathlib import Path
 from time import perf_counter
 
+from azure_blob_uploader import upload_files_to_azure_blob
 from firmacasas_scraper import export_json, listings_to_dataframe, scrape_listings
 
 
@@ -59,6 +61,21 @@ def build_parser() -> argparse.ArgumentParser:
         choices=("json", "csv"),
         default="json",
         help="Output format when --output is provided",
+    )
+    parser.add_argument(
+        "--upload-azure",
+        action="store_true",
+        help="Upload generated files to Azure Blob Storage",
+    )
+    parser.add_argument(
+        "--azure-container",
+        default=None,
+        help="Azure Blob container name (defaults to AZURE_STORAGE_CONTAINER env var)",
+    )
+    parser.add_argument(
+        "--azure-prefix",
+        default=None,
+        help="Optional blob path prefix inside the container",
     )
     return parser
 
@@ -121,6 +138,19 @@ def main() -> None:
     for file_path in sorted(written_files):
         print(f"- {file_path}")
     print(f"Processed-files log updated at {DEFAULT_LOG_FILE}")
+
+    if args.upload_azure:
+        container_name = args.azure_container or os.getenv("AZURE_STORAGE_CONTAINER", "")
+        default_prefix = f"firmacasas/{timestamp}"
+        blob_prefix = args.azure_prefix if args.azure_prefix is not None else default_prefix
+        uploaded_urls = upload_files_to_azure_blob(
+            file_paths=written_files,
+            container_name=container_name,
+            prefix=blob_prefix,
+        )
+        print(f"Uploaded {len(uploaded_urls)} file(s) to Azure Blob Storage:")
+        for url in uploaded_urls:
+            print(f"- {url}")
 
 
 if __name__ == "__main__":
