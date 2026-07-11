@@ -11,3 +11,6 @@ logs/
 # Virtual environments
 .venv
 .env
+
+# macOS Finder metadata
+.DS_Store
