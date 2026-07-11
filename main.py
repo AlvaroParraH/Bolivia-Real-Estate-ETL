@@ -62,6 +62,18 @@ def _log_processed_file(
         )
 
 
+def _log_blob_upload_event(
+    log_file: Path,
+    *,
+    run_timestamp: str,
+    event: str,
+    detail: str,
+) -> None:
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+    with log_file.open("a", encoding="utf-8") as handle:
+        handle.write(f"{run_timestamp}\tevent={event}\tdetail={detail}\n")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Scrape Century 21 Bolivia listings")
     parser.add_argument("--url", default=DEFAULT_URLS, help="Search results page or pages to scrape")
@@ -170,14 +182,30 @@ def main() -> None:
         container_name = args.azure_container or os.getenv("AZURE_STORAGE_CONTAINER", "")
         default_prefix = f"c21/{timestamp}"
         blob_prefix = args.azure_prefix if args.azure_prefix is not None else default_prefix
+        print(
+            f"Uploading {len(written_files)} file(s) to Azure Blob Storage "
+            f"(container={container_name}, prefix={blob_prefix})"
+        )
+        _log_blob_upload_event(
+            DEFAULT_LOG_FILE,
+            run_timestamp=timestamp,
+            event="blob_upload_start",
+            detail=f"container={container_name};prefix={blob_prefix};files={len(written_files)}",
+        )
         uploaded_urls = upload_files_to_azure_blob(
             file_paths=written_files,
             container_name=container_name,
             prefix=blob_prefix,
         )
         print(f"Uploaded {len(uploaded_urls)} file(s) to Azure Blob Storage:")
-        for url in uploaded_urls:
-            print(f"- {url}")
+        for file_path, url in zip(written_files, uploaded_urls):
+            print(f"- {file_path.name} -> {url}")
+            _log_blob_upload_event(
+                DEFAULT_LOG_FILE,
+                run_timestamp=timestamp,
+                event="blob_upload_success",
+                detail=f"file={file_path};url={url}",
+            )
 
 
 if __name__ == "__main__":

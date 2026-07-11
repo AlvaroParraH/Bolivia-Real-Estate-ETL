@@ -5,6 +5,7 @@ import html
 import json
 import random
 import re
+from datetime import datetime, timezone
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -72,6 +73,7 @@ LEADING_PROPERTY_PREFIXES = {
 
 @dataclass(slots=True)
 class Listing:
+    insert_datetime: str
     city: str
     property_id: str
     property_type: str
@@ -359,6 +361,7 @@ def _records_to_listings(
     records: list[dict[str, str | int | None]],
     seen_ids: set[str],
     fallback_city: str,
+    insert_datetime: str,
 ) -> list[Listing]:
     listings: list[Listing] = []
 
@@ -370,6 +373,7 @@ def _records_to_listings(
 
         listings.append(
             Listing(
+                insert_datetime=insert_datetime,
                 city=(
                     _city_from_property_id(property_id)
                     or _city_from_location_text(record.get("location"))
@@ -408,6 +412,7 @@ def scrape_listings(
     listings: list[Listing] = []
     seen_ids: set[str] = set()
     base_urls = _normalize_urls(url)
+    insert_datetime = datetime.now(timezone.utc).isoformat()
 
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True)
@@ -475,7 +480,7 @@ def scrape_listings(
                     break
 
                 records = _extract_records_from_listings_data(listings_data, remaining)
-                page_listings = _records_to_listings(records, seen_ids, city)
+                page_listings = _records_to_listings(records, seen_ids, city, insert_datetime)
                 if not page_listings:
                     break
 

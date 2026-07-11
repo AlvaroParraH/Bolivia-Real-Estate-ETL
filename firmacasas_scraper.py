@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import random
 import re
+from datetime import datetime, timezone
 from dataclasses import asdict, dataclass
 from html import unescape
 from pathlib import Path
@@ -57,6 +58,7 @@ NUMBER_RE = re.compile(r"[\d.,]+")
 
 @dataclass(slots=True)
 class Listing:
+    insert_datetime: str
     city: str
     property_id: str
     listing_id: int
@@ -200,7 +202,7 @@ def _build_listing_url(listing_id: int) -> str:
     return f"https://firmacasas.com/propiedad/{listing_id}"
 
 
-def _record_to_listing(record: dict) -> Listing:
+def _record_to_listing(record: dict, insert_datetime: str) -> Listing:
     listing_id = int(record["id"])
     currency_type = _parse_int(record.get("currency_type"))
     city_name = _extract_city_name(record)
@@ -209,6 +211,7 @@ def _record_to_listing(record: dict) -> Listing:
     price_text = _format_price(record.get("price"), currency_type)
 
     return Listing(
+        insert_datetime=insert_datetime,
         city=city_name,
         property_id=_clean_text(record.get("code")) or str(listing_id),
         listing_id=listing_id,
@@ -242,6 +245,7 @@ def scrape_listings(
     parking_spaces: int | None = None,
     limit: int | None = None,
 ) -> list[Listing]:
+    insert_datetime = datetime.now(timezone.utc).isoformat()
     payload = _build_filter_payload(
         city_ids=city_ids,
         property_category_ids=property_category_ids or list(DEFAULT_CATEGORY_IDS),
@@ -266,7 +270,7 @@ def scrape_listings(
             break
 
         for record in records:
-            listings.append(_record_to_listing(record))
+            listings.append(_record_to_listing(record, insert_datetime))
             if limit is not None and len(listings) >= limit:
                 return listings[:limit]
 
