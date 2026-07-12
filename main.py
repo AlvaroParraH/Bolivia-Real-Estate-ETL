@@ -119,8 +119,9 @@ def main() -> None:
     urls = _normalize_urls(args.url)
     output_dir, base_name = _resolve_output_target(args.output)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    run_output_dir = output_dir / timestamp
 
-    output_dir.mkdir(parents=True, exist_ok=True)
+    run_output_dir.mkdir(parents=True, exist_ok=True)
     remaining_limit = args.limit
     written_files: list[Path] = []
     total_rows_written = 0
@@ -142,7 +143,7 @@ def main() -> None:
         city_frame = listings_to_dataframe(city_listings)
         city_name = str(city_frame["city"].iloc[0]) if "city" in city_frame.columns else _city_from_url(base_url)
         city_slug = _slugify_city(city_name)
-        output_path = output_dir / f"{base_name}_{city_slug}_{timestamp}.{args.format}"
+        output_path = run_output_dir / f"{base_name}_{city_slug}_{timestamp}.{args.format}"
 
         if args.format == "csv":
             # Use UTF-8 BOM so spreadsheet tools reliably detect Unicode accents.
@@ -176,6 +177,7 @@ def main() -> None:
     print(f"Wrote {total_rows_written} listings across {len(written_files)} file(s):")
     for file_path in sorted(written_files):
         print(f"- {file_path}")
+    print(f"Run output directory: {run_output_dir}")
     print(f"Processed-files log updated at {DEFAULT_LOG_FILE}")
 
     if args.upload_azure:

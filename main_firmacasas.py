@@ -102,7 +102,8 @@ def main() -> None:
 
     output_dir, base_name = _resolve_output_target(args.output)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_dir.mkdir(parents=True, exist_ok=True)
+    run_output_dir = output_dir / timestamp
+    run_output_dir.mkdir(parents=True, exist_ok=True)
 
     listings = scrape_listings(
         city_ids=args.city_id,
@@ -122,7 +123,7 @@ def main() -> None:
     for city, city_frame in frame.groupby("city", dropna=False):
         city_name = str(city) if city else "unknown"
         city_slug = _slugify_city(city_name)
-        output_path = output_dir / f"{base_name}_{city_slug}_{timestamp}.{args.format}"
+        output_path = run_output_dir / f"{base_name}_{city_slug}_{timestamp}.{args.format}"
 
         if args.format == "csv":
             city_frame.to_csv(output_path, index=False, encoding="utf-8-sig")
@@ -149,6 +150,7 @@ def main() -> None:
     print(f"Wrote {total_rows_written} listings across {len(written_files)} file(s):")
     for file_path in sorted(written_files):
         print(f"- {file_path}")
+    print(f"Run output directory: {run_output_dir}")
     print(f"Processed-files log updated at {DEFAULT_LOG_FILE}")
 
     if args.upload_azure:

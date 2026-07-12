@@ -54,7 +54,15 @@ Run it with:
 
 Outputs are now split by city and include a timestamp in the filename, for example:
 `data/c21_house_listings_la-paz_20260703_143500.csv`.
+Each run now writes files inside a datetime folder, for example:
+`data/20260712_093000/c21_house_listings_la-paz_20260712_093000.csv`.
 The default scrape targets the La Paz and Santa Cruz houses and houses-in-condominium sale results pages.
+
+Current C21 behavior (temporary):
+- The second phase (entering each listing detail page for map enrichment) is intentionally commented out in code.
+- Only phase 1 (result/list page extraction) runs, which improves execution time.
+- `map_google_url`, `map_latitude`, and `map_longitude` are currently exported as empty values (`null`).
+- Each exported row includes `insert_datetime` (UTC ISO timestamp) to track ingestion time.
 
 # RE/MAX scraper
 This project now also includes a Playwright-based scraper for RE/MAX Bolivia search result pages.
@@ -69,6 +77,8 @@ Run it with:
 
 Outputs are also split by city and include a timestamp in the filename, for example:
 `data/remax_house_listings_la-paz_20260703_143500.csv`.
+Each run now writes files inside a datetime folder, for example:
+`data/20260712_093000/remax_house_listings_la-paz_20260712_093000.csv`.
 
 # Firmacasas scraper
 This project now also includes an API-based scraper for Firmacasas listings.
@@ -89,6 +99,24 @@ Run it with:
 
 Outputs are split by city and include a timestamp in the filename, for example:
 `data/firmacasas_house_listings_la-paz_20260704_064113.csv`.
+Each run now writes files inside a datetime folder, for example:
+`data/20260712_093000/firmacasas_house_listings_la-paz_20260712_093000.csv`.
+
+# Azure Blob upload behavior
+By default, scraper runs only write files locally under `data/<YYYYMMDD_HHMMSS>/`.
+Files are uploaded to Azure Blob Storage only when `--upload-azure` is explicitly provided.
+
+Examples with `uv run`:
+
+```bash
+uv run main.py --format csv --upload-azure 
+uv run main_remax.py --format csv --upload-azure
+uv run main_firmacasas.py --format csv --upload-azure
+```
+
+Optional upload parameters (all three scripts):
+- `--azure-container <container_name>`
+- `--azure-prefix <blob/path/prefix>`
 
 # Posting information on Reddit on Rentals
 This information is going to be posted on reddit and comments are going to be monitored for improving it.

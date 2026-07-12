@@ -404,9 +404,11 @@ def scrape_listings(
         )
 
         page = context.new_page()
-        detail_page = context.new_page()
         page.set_default_timeout(30000)
-        detail_page.set_default_timeout(30000)
+        # Phase 2 (detail-page map enrichment) is intentionally disabled for now.
+        # Keep this commented block to reuse with new extraction logic later.
+        # detail_page = context.new_page()
+        # detail_page.set_default_timeout(30000)
 
         for base_url in base_urls:
             city = _infer_city_label(base_url)
@@ -430,13 +432,14 @@ def scrape_listings(
                 if not page_listings:
                     break
 
-                if enrich_map_details:
-                    for listing in page_listings:
-                        map_details = _extract_map_details(detail_page, listing.url)
-                        listing.map_google_url = map_details["map_google_url"]
-                        listing.map_latitude = map_details["map_latitude"]
-                        listing.map_longitude = map_details["map_longitude"]
-                        _close_extra_pages(context, (page, detail_page))
+                # Phase 2 (entering each listing page for map detail extraction) disabled.
+                # if enrich_map_details:
+                #     for listing in page_listings:
+                #         map_details = _extract_map_details(detail_page, listing.url)
+                #         listing.map_google_url = map_details["map_google_url"]
+                #         listing.map_latitude = map_details["map_latitude"]
+                #         listing.map_longitude = map_details["map_longitude"]
+                #         _close_extra_pages(context, (page, detail_page))
 
                 listings.extend(page_listings)
                 if limit is not None and len(listings) >= limit:
