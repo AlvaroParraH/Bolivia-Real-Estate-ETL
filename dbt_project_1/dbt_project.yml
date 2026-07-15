@@ -33,11 +33,9 @@ models:
   dbt_project_1:
     staging:
       +materialized: table
-      snowflake_warehouse: dbt_warehouse
       +tags:
         - staging
     integration:
       +materialized: table
-      snowflake_warehouse: dbt_warehouse
       +tags:
         - integration
