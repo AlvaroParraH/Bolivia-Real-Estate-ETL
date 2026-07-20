@@ -25,6 +25,18 @@ Useful checks:
 - `docker compose logs -f airflow-scheduler` to follow the scheduler
 - `docker compose logs -f airflow-apiserver` to follow the UI/API
 
+Airflow DAG:
+- DAG file: [Airflow/dags/run_scrapers_dag.py](Airflow/dags/run_scrapers_dag.py)
+- It runs the three scrapers sequentially and uploads their generated files to Azure Blob Storage with `--upload-azure`.
+- The repo is mounted into the containers at `/opt/bolivia-real-estate-etl`, so the DAG runs the scraper scripts from that path.
+
+Airflow also includes a scraper DAG at [Airflow/dags/run_scrapers_dag.py](Airflow/dags/run_scrapers_dag.py). It runs the scrapers in sequence:
+1. `main.py`
+2. `main_remax.py`
+3. `main_firmacasas.py`
+
+The compose file mounts the repo root into the containers at `/opt/bolivia-real-estate-etl`, so the DAG can execute the scraper scripts directly from the project directory.
+
 # Start uv and install packages
 uv init
 uv add dbt-core dbt-snowflake
