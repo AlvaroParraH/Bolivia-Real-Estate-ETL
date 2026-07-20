@@ -1,15 +1,30 @@
-# Airflow docker compose
-Getting Airflow docker-compose.yaml from https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html
-Create .env file
-# Run docker compose
-docker compose up -d
-# Access to airflow
-Go to http://localhost:8080/auth/login/
-User/Password: airflow
-# Start airflow
+# Airflow
+The Airflow stack lives in [Airflow/docker-compose.yaml](Airflow/docker-compose.yaml).
+
+Before starting it, make sure [Airflow/.env](Airflow/.env) exists with at least `AIRFLOW_UID` and `AIRFLOW_PROJ_DIR`.
+
+Current project setup:
+- `AIRFLOW_PROJ_DIR=.` in [Airflow/.env](Airflow/.env), so the compose file uses the [Airflow](Airflow) folder as the project root for `dags/`, `logs/`, `config/`, and `plugins/` mounts.
+- Keep [Airflow/.env](Airflow/.env) alongside [Airflow/docker-compose.yaml](Airflow/docker-compose.yaml) so `docker compose` can resolve the environment file automatically.
+
+Run it from the [Airflow](Airflow) directory:
+
+```bash
 docker compose up airflow-init
-# Stop airflow
+docker compose up -d
+docker compose ps
 docker compose down
+```
+
+Access Airflow at:
+- http://localhost:8080/auth/login/
+- Username/password: `airflow` / `airflow`
+
+Useful checks:
+- `docker compose ps` to see service health
+- `docker compose logs -f airflow-scheduler` to follow the scheduler
+- `docker compose logs -f airflow-apiserver` to follow the UI/API
+
 # Start uv and install packages
 uv init
 uv add dbt-core dbt-snowflake
