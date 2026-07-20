@@ -27,13 +27,22 @@ Useful checks:
 
 Airflow DAG:
 - DAG file: [Airflow/dags/run_scrapers_dag.py](Airflow/dags/run_scrapers_dag.py)
-- It runs the three scrapers sequentially and uploads their generated files to Azure Blob Storage with `--upload-azure`.
+- It runs the three scrapers sequentially, uploads their generated files to Azure Blob Storage with `--upload-azure`, and then runs the three staging dbt models in sequence.
 - The repo is mounted into the containers at `/opt/bolivia-real-estate-etl`, so the DAG runs the scraper scripts from that path.
+- Airflow must be restarted after updating [Airflow/.env](Airflow/.env) so the container can install `dbt-core` and `dbt-snowflake` through `_PIP_ADDITIONAL_REQUIREMENTS`.
+
+To trigger it:
+- In the Airflow UI, open the `run_bolivia_real_estate_scrapers` DAG and click Trigger DAG.
+- Or from the Airflow container:
+	`docker compose exec airflow-apiserver airflow dags trigger run_bolivia_real_estate_scrapers`
 
 Airflow also includes a scraper DAG at [Airflow/dags/run_scrapers_dag.py](Airflow/dags/run_scrapers_dag.py). It runs the scrapers in sequence:
 1. `main.py`
 2. `main_remax.py`
 3. `main_firmacasas.py`
+4. `uv run dbt run --project-dir dbt_project_1 --select stg_c21_stage`
+5. `uv run dbt run --project-dir dbt_project_1 --select stg_remax_stage`
+6. `uv run dbt run --project-dir dbt_project_1 --select stg_firmacasas_stage`
 
 The compose file mounts the repo root into the containers at `/opt/bolivia-real-estate-etl`, so the DAG can execute the scraper scripts directly from the project directory.
 

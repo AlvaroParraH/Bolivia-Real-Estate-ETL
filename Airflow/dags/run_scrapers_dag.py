@@ -31,22 +31,40 @@ with DAG(
         env=DEFAULT_ENV,
     )
 
-    run_c21 = BashOperator(
-        task_id="run_c21_scraper",
+    scrape_c21 = BashOperator(
+        task_id="scrape_c21",
         bash_command='cd "$PROJECT_ROOT" && python main.py --format csv --upload-azure',
         env=DEFAULT_ENV,
     )
 
-    run_remax = BashOperator(
-        task_id="run_remax_scraper",
+    scrape_remax = BashOperator(
+        task_id="scrape_remax",
         bash_command='cd "$PROJECT_ROOT" && python main_remax.py --format csv --upload-azure',
         env=DEFAULT_ENV,
     )
 
-    run_firmacasas = BashOperator(
-        task_id="run_firmacasas_scraper",
+    scrape_firmacasas = BashOperator(
+        task_id="scrape_firmacasas",
         bash_command='cd "$PROJECT_ROOT" && python main_firmacasas.py --format csv --upload-azure',
         env=DEFAULT_ENV,
     )
 
-    prepare_playwright >> run_c21 >> run_remax >> run_firmacasas
+    dbt_stg_c21 = BashOperator(
+        task_id="dbt_stg_c21",
+        bash_command='cd "$PROJECT_ROOT" && uv run dbt run --project-dir dbt_project_1 --select stg_c21_stage',
+        env=DEFAULT_ENV,
+    )
+
+    dbt_stg_remax = BashOperator(
+        task_id="dbt_stg_remax",
+        bash_command='cd "$PROJECT_ROOT" && uv run dbt run --project-dir dbt_project_1 --select stg_remax_stage',
+        env=DEFAULT_ENV,
+    )
+
+    dbt_stg_firmacasas = BashOperator(
+        task_id="dbt_stg_firmacasas",
+        bash_command='cd "$PROJECT_ROOT" && uv run dbt run --project-dir dbt_project_1 --select stg_firmacasas_stage',
+        env=DEFAULT_ENV,
+    )
+
+    prepare_playwright >> scrape_c21 >> scrape_remax >> scrape_firmacasas >> dbt_stg_c21 >> dbt_stg_remax >> dbt_stg_firmacasas
