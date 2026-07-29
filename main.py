@@ -15,6 +15,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "data"
 DEFAULT_LOG_FILE = PROJECT_ROOT / "logs" / "processed_files.log"
 CITY_RE = re.compile(r"en-estado_([^/]+)")
+PROPERTY_TYPE_RE = re.compile(r"tipo_([^/]+)")
+OPERATION_RE = re.compile(r"operacion_([^/]+)")
 
 
 def _resolve_output_target(output_arg: str | None) -> tuple[Path, str]:
@@ -45,6 +47,26 @@ def _city_from_url(url: str) -> str:
     if not match:
         return "unknown"
     return match.group(1).replace("_", "-").lower()
+
+
+def _slugify_token(value: str) -> str:
+    slug = value.strip().lower().replace("_", "-")
+    slug = "".join(ch for ch in slug if ch.isalnum() or ch in "-")
+    return slug or "unknown"
+
+
+def _property_type_from_url(url: str) -> str:
+    match = PROPERTY_TYPE_RE.search(url)
+    if not match:
+        return "unknown"
+    return _slugify_token(match.group(1))
+
+
+def _operation_from_url(url: str) -> str:
+    match = OPERATION_RE.search(url)
+    if not match:
+        return "unknown"
+    return _slugify_token(match.group(1))
 
 
 def _log_processed_file(
@@ -143,7 +165,11 @@ def main() -> None:
         city_frame = listings_to_dataframe(city_listings)
         city_name = str(city_frame["city"].iloc[0]) if "city" in city_frame.columns else _city_from_url(base_url)
         city_slug = _slugify_city(city_name)
-        output_path = run_output_dir / f"{base_name}_{city_slug}_{timestamp}.{args.format}"
+        operation_slug = _operation_from_url(base_url)
+        property_type_slug = _property_type_from_url(base_url)
+        output_path = run_output_dir / (
+            f"{base_name}_{city_slug}_{operation_slug}_{property_type_slug}_{timestamp}.{args.format}"
+        )
 
         if args.format == "csv":
             # Use UTF-8 BOM so spreadsheet tools reliably detect Unicode accents.
