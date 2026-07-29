@@ -20,9 +20,49 @@ DEFAULT_URL = (
     "tipo_casa-o-casa-en-condominio/operacion_venta/en-pais_bolivia/en-estado_la-paz"
 )
 
+DEFAULT_URL_RENTA = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_casa-o-casa-en-condominio/operacion_renta/en-pais_bolivia/en-estado_la-paz"
+)
+
+DEFAULT_URL_DEPARTAMENTO = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_departamento-o-penthouse/operacion_venta/en-pais_bolivia/en-estado_la-paz"
+)
+
+DEFAULT_URL_DEPARTAMENTO_RENTA = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_departamento-o-penthouse/operacion_renta/en-pais_bolivia/en-estado_la-paz"
+)
+
+DEFAULT_URL_TERRENO = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_terreno/operacion_venta/en-pais_bolivia/en-estado_la-paz"
+)
+
 DEFAULT_URL_SANTA_CRUZ = (
     "https://c21.com.bo/v/resultados/"
     "tipo_casa-o-casa-en-condominio/operacion_venta/en-pais_bolivia/en-estado_santa-cruz"
+)
+
+DEFAULT_URL_RENTA_SANTA_CRUZ = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_casa-o-casa-en-condominio/operacion_renta/en-pais_bolivia/en-estado_santa-cruz"
+)
+
+DEFAULT_URL_DEPARTAMENTO_SANTA_CRUZ = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_departamento-o-penthouse/operacion_venta/en-pais_bolivia/en-estado_santa-cruz"
+)
+
+DEFAULT_URL_DEPARTAMENTO_RENTA_SANTA_CRUZ = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_departamento-o-penthouse/operacion_renta/en-pais_bolivia/en-estado_santa-cruz"
+)
+
+DEFAULT_URL_TERRENO_SANTA_CRUZ = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_terreno/operacion_venta/en-pais_bolivia/en-estado_santa-cruz"
 )
 
 DEFAULT_URL_COCHABAMBA = (
@@ -30,9 +70,49 @@ DEFAULT_URL_COCHABAMBA = (
     "tipo_casa-o-casa-en-condominio/operacion_venta/en-pais_bolivia/en-estado_cochabamba"
 )
 
+DEFAULT_URL_RENTA_COCHABAMBA = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_casa-o-casa-en-condominio/operacion_renta/en-pais_bolivia/en-estado_cochabamba"
+)
+
+DEFAULT_URL_DEPARTAMENTO_COCHABAMBA = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_departamento-o-penthouse/operacion_venta/en-pais_bolivia/en-estado_cochabamba"
+)
+
+DEFAULT_URL_DEPARTAMENTO_RENTA_COCHABAMBA = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_departamento-o-penthouse/operacion_renta/en-pais_bolivia/en-estado_cochabamba"
+)
+
+DEFAULT_URL_TERRENO_COCHABAMBA = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_terreno/operacion_venta/en-pais_bolivia/en-estado_cochabamba"
+)
+
 DEFAULT_URL_BENI = (
     "https://c21.com.bo/v/resultados/"
     "tipo_casa-o-casa-en-condominio/operacion_venta/en-pais_bolivia/en-estado_beni"
+)
+
+DEFAULT_URL_RENTA_BENI = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_casa-o-casa-en-condominio/operacion_renta/en-pais_bolivia/en-estado_beni"
+)
+
+DEFAULT_URL_DEPARTAMENTO_BENI = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_departamento-o-penthouse/operacion_venta/en-pais_bolivia/en-estado_beni"
+)
+
+DEFAULT_URL_DEPARTAMENTO_RENTA_BENI = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_departamento-o-penthouse/operacion_renta/en-pais_bolivia/en-estado_beni"
+)
+
+DEFAULT_URL_TERRENO_BENI = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_terreno/operacion_venta/en-pais_bolivia/en-estado_beni"
 )
 
 DEFAULT_URL_CHUQUISACA = (
@@ -40,9 +120,49 @@ DEFAULT_URL_CHUQUISACA = (
     "tipo_casa-o-casa-en-condominio/operacion_venta/en-pais_bolivia/en-estado_chuquisaca"
 )
 
+DEFAULT_URL_RENTA_CHUQUISACA = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_casa-o-casa-en-condominio/operacion_renta/en-pais_bolivia/en-estado_chuquisaca"
+)
+
+DEFAULT_URL_DEPARTAMENTO_CHUQUISACA = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_departamento-o-penthouse/operacion_venta/en-pais_bolivia/en-estado_chuquisaca"
+)
+
+DEFAULT_URL_DEPARTAMENTO_RENTA_CHUQUISACA = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_departamento-o-penthouse/operacion_renta/en-pais_bolivia/en-estado_chuquisaca"
+)
+
+DEFAULT_URL_TERRENO_CHUQUISACA = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_terreno/operacion_venta/en-pais_bolivia/en-estado_chuquisaca"
+)
+
 DEFAULT_URL_ORURO = (
     "https://c21.com.bo/v/resultados/"
     "tipo_casa-o-casa-en-condominio/operacion_venta/en-pais_bolivia/en-estado_oruro"
+)
+
+DEFAULT_URL_RENTA_ORURO = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_casa-o-casa-en-condominio/operacion_renta/en-pais_bolivia/en-estado_oruro"
+)
+
+DEFAULT_URL_DEPARTAMENTO_ORURO = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_departamento-o-penthouse/operacion_venta/en-pais_bolivia/en-estado_oruro"
+)
+
+DEFAULT_URL_DEPARTAMENTO_RENTA_ORURO = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_departamento-o-penthouse/operacion_renta/en-pais_bolivia/en-estado_oruro"
+)
+
+DEFAULT_URL_TERRENO_ORURO = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_terreno/operacion_venta/en-pais_bolivia/en-estado_oruro"
 )
 
 DEFAULT_URL_POTOSI = (
@@ -50,20 +170,92 @@ DEFAULT_URL_POTOSI = (
     "tipo_casa-o-casa-en-condominio/operacion_venta/en-pais_bolivia/en-estado_potosi"
 )
 
+DEFAULT_URL_RENTA_POTOSI = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_casa-o-casa-en-condominio/operacion_renta/en-pais_bolivia/en-estado_potosi"
+)
+
+DEFAULT_URL_DEPARTAMENTO_POTOSI = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_departamento-o-penthouse/operacion_venta/en-pais_bolivia/en-estado_potosi"
+)
+
+DEFAULT_URL_DEPARTAMENTO_RENTA_POTOSI = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_departamento-o-penthouse/operacion_renta/en-pais_bolivia/en-estado_potosi"
+)
+
+DEFAULT_URL_TERRENO_POTOSI = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_terreno/operacion_venta/en-pais_bolivia/en-estado_potosi"
+)
+
 DEFAULT_URL_TARIJA = (
     "https://c21.com.bo/v/resultados/"
     "tipo_casa-o-casa-en-condominio/operacion_venta/en-pais_bolivia/en-estado_tarija"
 )
 
+DEFAULT_URL_RENTA_TARIJA = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_casa-o-casa-en-condominio/operacion_renta/en-pais_bolivia/en-estado_tarija"
+)
+
+DEFAULT_URL_DEPARTAMENTO_TARIJA = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_departamento-o-penthouse/operacion_venta/en-pais_bolivia/en-estado_tarija"
+)
+
+DEFAULT_URL_DEPARTAMENTO_RENTA_TARIJA = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_departamento-o-penthouse/operacion_renta/en-pais_bolivia/en-estado_tarija"
+)
+
+DEFAULT_URL_TERRENO_TARIJA = (
+    "https://c21.com.bo/v/resultados/"
+    "tipo_terreno/operacion_venta/en-pais_bolivia/en-estado_tarija"
+)
+
 DEFAULT_URLS = (
     DEFAULT_URL,
+    DEFAULT_URL_RENTA,
+    DEFAULT_URL_DEPARTAMENTO,
+    DEFAULT_URL_DEPARTAMENTO_RENTA,
+    DEFAULT_URL_TERRENO,
     DEFAULT_URL_COCHABAMBA,
+    DEFAULT_URL_RENTA_COCHABAMBA,
+    DEFAULT_URL_DEPARTAMENTO_COCHABAMBA,
+    DEFAULT_URL_DEPARTAMENTO_RENTA_COCHABAMBA,
+    DEFAULT_URL_TERRENO_COCHABAMBA,
     DEFAULT_URL_BENI,
+    DEFAULT_URL_RENTA_BENI,
+    DEFAULT_URL_DEPARTAMENTO_BENI,
+    DEFAULT_URL_DEPARTAMENTO_RENTA_BENI,
+    DEFAULT_URL_TERRENO_BENI,
     DEFAULT_URL_CHUQUISACA,
+    DEFAULT_URL_RENTA_CHUQUISACA,
+    DEFAULT_URL_DEPARTAMENTO_CHUQUISACA,
+    DEFAULT_URL_DEPARTAMENTO_RENTA_CHUQUISACA,
+    DEFAULT_URL_TERRENO_CHUQUISACA,
     DEFAULT_URL_ORURO,
+    DEFAULT_URL_RENTA_ORURO,
+    DEFAULT_URL_DEPARTAMENTO_ORURO,
+    DEFAULT_URL_DEPARTAMENTO_RENTA_ORURO,
+    DEFAULT_URL_TERRENO_ORURO,
     DEFAULT_URL_POTOSI,
+    DEFAULT_URL_RENTA_POTOSI,
+    DEFAULT_URL_DEPARTAMENTO_POTOSI,
+    DEFAULT_URL_DEPARTAMENTO_RENTA_POTOSI,
+    DEFAULT_URL_TERRENO_POTOSI,
     DEFAULT_URL_TARIJA,
+    DEFAULT_URL_RENTA_TARIJA,
+    DEFAULT_URL_DEPARTAMENTO_TARIJA,
+    DEFAULT_URL_DEPARTAMENTO_RENTA_TARIJA,
+    DEFAULT_URL_TERRENO_TARIJA,
     DEFAULT_URL_SANTA_CRUZ,
+    DEFAULT_URL_RENTA_SANTA_CRUZ,
+    DEFAULT_URL_DEPARTAMENTO_SANTA_CRUZ,
+    DEFAULT_URL_DEPARTAMENTO_RENTA_SANTA_CRUZ,
+    DEFAULT_URL_TERRENO_SANTA_CRUZ,
 )
 
 DEFAULT_USER_AGENT = (
