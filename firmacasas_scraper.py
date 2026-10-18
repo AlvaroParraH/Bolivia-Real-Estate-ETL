@@ -26,8 +26,6 @@ DEFAULT_REQUEST_RETRIES = 3
 DEFAULT_REQUEST_TIMEOUT = 30
 DEFAULT_MIN_DELAY_MS = 150
 DEFAULT_MAX_DELAY_MS = 450
-DEFAULT_CATEGORY_IDS = (1,)
-DEFAULT_TYPE_IDS = (2,)
 
 PROPERTY_CATEGORY_LABELS = {
     1: "Casa",
@@ -52,6 +50,9 @@ CURRENCY_LABELS = {
     0: "USD",
     1: "Bs.",
 }
+
+DEFAULT_CATEGORY_IDS = tuple(sorted(PROPERTY_CATEGORY_LABELS.keys()))
+DEFAULT_TYPE_IDS: tuple[int, ...] = ()
 
 NUMBER_RE = re.compile(r"[\d.,]+")
 
@@ -205,6 +206,8 @@ def _build_listing_url(listing_id: int) -> str:
 def _record_to_listing(record: dict, insert_datetime: str) -> Listing:
     listing_id = int(record["id"])
     currency_type = _parse_int(record.get("currency_type"))
+    property_category_id = _parse_int(record.get("property_category"))
+    property_type_id = _parse_int(record.get("property_type"))
     city_name = _extract_city_name(record)
     zone_name = _clean_text((record.get("zone") or {}).get("name"))
     location = f"{city_name} - {zone_name}" if zone_name else city_name
@@ -215,8 +218,8 @@ def _record_to_listing(record: dict, insert_datetime: str) -> Listing:
         city=city_name,
         property_id=_clean_text(record.get("code")) or str(listing_id),
         listing_id=listing_id,
-        property_category=PROPERTY_CATEGORY_LABELS.get(_parse_int(record.get("property_category")) or -1, "Unknown"),
-        transaction_type=PROPERTY_TYPE_LABELS.get(_parse_int(record.get("property_type")) or -1, "Unknown"),
+        property_category=PROPERTY_CATEGORY_LABELS.get(property_category_id, "Unknown"),
+        transaction_type=PROPERTY_TYPE_LABELS.get(property_type_id, "Unknown"),
         title=_clean_text(record.get("property_title")),
         location=location,
         address=_clean_text(record.get("address")),

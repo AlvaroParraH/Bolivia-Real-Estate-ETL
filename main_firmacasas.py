@@ -14,8 +14,8 @@ from firmacasas_scraper import export_json, listings_to_dataframe, scrape_listin
 PROJECT_ROOT = Path(__file__).resolve().parent
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "data"
 DEFAULT_LOG_FILE = PROJECT_ROOT / "logs" / "processed_files.log"
-DEFAULT_CATEGORY_IDS = (1,)
-DEFAULT_TYPE_IDS = (2,)
+DEFAULT_CATEGORY_IDS = tuple(range(1, 11))
+DEFAULT_TYPE_IDS: tuple[int, ...] = ()
 NON_ALNUM_RE = re.compile(r"[^a-z0-9_-]+")
 
 

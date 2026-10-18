@@ -290,9 +290,6 @@ class Listing:
     price_amount: int | None
     url: str
     thumbnail_url: str | None
-    map_google_url: str | None
-    map_latitude: float | None
-    map_longitude: float | None
 
 
 def _clean_text(value: str | None) -> str:
@@ -414,7 +411,21 @@ def _extract_records(page: object, limit: int | None = None) -> list[dict[str, s
           const locationNode = card?.querySelector('h2');
           const detailNodes = card ? Array.from(card.querySelectorAll('h3')) : [];
           const priceNode = card?.querySelector('h5');
-          const imageNode = card?.querySelector('img');
+                    let imageUrl = null;
+                    let current = button;
+                    for (let depth = 0; depth < 8 && current; depth += 1) {
+                        const imageNode = current.querySelector('img[src], img[data-src], img[data-lazy-src], img[srcset]');
+                        if (imageNode) {
+                            imageUrl =
+                                imageNode.getAttribute('src') ||
+                                imageNode.getAttribute('data-src') ||
+                                imageNode.getAttribute('data-lazy-src') ||
+                                imageNode.getAttribute('srcset')?.split(',')?.[0]?.trim()?.split(' ')?.[0] ||
+                                null;
+                            if (imageUrl) break;
+                        }
+                        current = current.parentElement;
+                    }
 
           const detailsText = detailNodes.map((node) => node.textContent?.trim() || '');
           const landConstruction = detailsText[0] || '';
@@ -441,7 +452,7 @@ def _extract_records(page: object, limit: int | None = None) -> list[dict[str, s
             parking_spaces: parkingMatch ? Number(parkingMatch[1]) : null,
             price_text: priceNode?.textContent || '',
             url: href,
-            thumbnail_url: imageNode?.src || null,
+                        thumbnail_url: imageUrl,
           };
         })
         """,
@@ -552,9 +563,6 @@ def _records_to_listings(
                 price_amount=_parse_price(record.get("price_text")),
                 url=_clean_text(record.get("url")),
                 thumbnail_url=_clean_text(record.get("thumbnail_url")) or None,
-                map_google_url=None,
-                map_latitude=None,
-                map_longitude=None,
             )
         )
 

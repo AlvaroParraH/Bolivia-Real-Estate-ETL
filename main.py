@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import os
 import re
+from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from time import perf_counter
@@ -15,8 +16,6 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "data"
 DEFAULT_LOG_FILE = PROJECT_ROOT / "logs" / "processed_files.log"
 CITY_RE = re.compile(r"en-estado_([^/]+)")
-PROPERTY_TYPE_RE = re.compile(r"tipo_([^/]+)")
-OPERATION_RE = re.compile(r"operacion_([^/]+)")
 
 
 def _resolve_output_target(output_arg: str | None) -> tuple[Path, str]:
@@ -39,7 +38,8 @@ def _slugify_city(city: str) -> str:
 def _normalize_urls(urls: str | tuple[str, ...]) -> list[str]:
     if isinstance(urls, str):
         return [urls]
-    return [url for url in urls if url]
+    # Keep order stable while preventing accidental duplicate URL processing.
+    return list(dict.fromkeys(url for url in urls if url))
 
 
 def _city_from_url(url: str) -> str:
@@ -47,26 +47,6 @@ def _city_from_url(url: str) -> str:
     if not match:
         return "unknown"
     return match.group(1).replace("_", "-").lower()
-
-
-def _slugify_token(value: str) -> str:
-    slug = value.strip().lower().replace("_", "-")
-    slug = "".join(ch for ch in slug if ch.isalnum() or ch in "-")
-    return slug or "unknown"
-
-
-def _property_type_from_url(url: str) -> str:
-    match = PROPERTY_TYPE_RE.search(url)
-    if not match:
-        return "unknown"
-    return _slugify_token(match.group(1))
-
-
-def _operation_from_url(url: str) -> str:
-    match = OPERATION_RE.search(url)
-    if not match:
-        return "unknown"
-    return _slugify_token(match.group(1))
 
 
 def _log_processed_file(
@@ -145,6 +125,7 @@ def main() -> None:
 
     run_output_dir.mkdir(parents=True, exist_ok=True)
     remaining_limit = args.limit
+    city_buckets: dict[str, list] = defaultdict(list)
     written_files: list[Path] = []
     total_rows_written = 0
 
@@ -162,20 +143,25 @@ def main() -> None:
             print(f"No listings found for city URL: {base_url}")
             continue
 
-        city_frame = listings_to_dataframe(city_listings)
-        city_name = str(city_frame["city"].iloc[0]) if "city" in city_frame.columns else _city_from_url(base_url)
+        city_name = city_listings[0].city if city_listings else _city_from_url(base_url)
+        city_buckets[city_name].extend(city_listings)
+
+        if remaining_limit is not None:
+            remaining_limit -= len(city_listings)
+
+    for city_name, grouped_listings in sorted(city_buckets.items()):
+        if not grouped_listings:
+            continue
+
+        city_frame = listings_to_dataframe(grouped_listings)
         city_slug = _slugify_city(city_name)
-        operation_slug = _operation_from_url(base_url)
-        property_type_slug = _property_type_from_url(base_url)
-        output_path = run_output_dir / (
-            f"{base_name}_{city_slug}_{operation_slug}_{property_type_slug}_{timestamp}.{args.format}"
-        )
+        output_path = run_output_dir / f"{base_name}_{city_slug}_{timestamp}.{args.format}"
 
         if args.format == "csv":
             # Use UTF-8 BOM so spreadsheet tools reliably detect Unicode accents.
             city_frame.to_csv(output_path, index=False, encoding="utf-8-sig")
         else:
-            export_json(city_listings, str(output_path))
+            export_json(grouped_listings, str(output_path))
 
         _log_processed_file(
             DEFAULT_LOG_FILE,
@@ -188,9 +174,6 @@ def main() -> None:
         print(f"Wrote city file: {output_path} ({len(city_frame)} rows)")
         written_files.append(output_path)
         total_rows_written += len(city_frame)
-
-        if remaining_limit is not None:
-            remaining_limit -= len(city_frame)
 
     ended_at = datetime.now()
     elapsed_seconds = perf_counter() - started_perf
